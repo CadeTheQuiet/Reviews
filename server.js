@@ -1,37 +1,33 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
-const app = express();
-const PORT = process.env.PORT || 3000;
 
-let cachedReviews = [];
-let lastFetched = 0;
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+app.use(cors());
 
 app.get('/reviews', async (req, res) => {
-  const now = Date.now();
-  const shouldRefresh = now - lastFetched > 1000 * 60 * 60 * 6; // refresh every 6 hours
-
-  if (!shouldRefresh && cachedReviews.length > 0) {
-    return res.json(cachedReviews);
-  }
+  const apiKey = process.env.SERPAPI_KEY;
+  const placeId = process.env.PLACE_ID;
 
   try {
-    const response = await fetch(
-      `https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${process.env.PLACE_ID}&api_key=${process.env.SERPAPI_KEY}&hl=en`
-    );
+    const response = await fetch(`https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${placeId}&api_key=${apiKey}&hl=en`);
     const data = await response.json();
 
-    const reviews = data.reviews || [];
+    console.log('Fetched reviews from SerpAPI:', data.reviews?.length); // For debugging
 
-    cachedReviews = reviews;
-    lastFetched = now;
-
-    res.json(reviews);
-  } catch (error) {
-    console.error('Error fetching reviews from SerpAPI:', error);
-    res.status(500).json({ error: 'Failed to load reviews' });
+    if (data.reviews) {
+      res.json(data.reviews);
+    } else {
+      res.status(500).json({ error: 'No reviews found in response', raw: data });
+    }
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 });
 
