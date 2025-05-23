@@ -1,43 +1,31 @@
-const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 
-const SERPAPI_KEY = process.env.SERPAPI_KEY;
-const PLACE_ID = process.env.PLACE_ID;
+const SERPAPI_KEY = process.env.SERPAPI_KEY; // Make sure this env var is set
 
-if (!SERPAPI_KEY || !PLACE_ID) {
-  console.error('Missing SERPAPI_KEY or PLACE_ID env vars');
-  process.exit(1);
-}
-
-async function fetchReviews() {
-  const url = `https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${PLACE_ID}&api_key=${SERPAPI_KEY}`;
-
+async function updateReviews() {
   try {
+    const url = `https://serpapi.com/search.json?engine=google_maps_reviews&place_id=ChIJuyDfaumFf4gRpdTNhZ9Z0_Q&api_key=${SERPAPI_KEY}`;
     const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
     const data = await res.json();
 
     if (!data.reviews || data.reviews.length === 0) {
-      throw new Error('No reviews found');
+      throw new Error('No reviews found in SerpAPI response');
     }
 
-    // Normalize or just save directly:
-    return data.reviews;
-  } catch (e) {
-    console.error('Error fetching reviews:', e);
-    process.exit(1);
+    // Save reviews.json locally
+    const filePath = path.resolve(__dirname, 'reviews.json');
+    fs.writeFileSync(filePath, JSON.stringify(data.reviews, null, 2));
+
+    console.log(`Successfully updated ${data.reviews.length} reviews.`);
+  } catch (error) {
+    console.error('Failed to update reviews:', error.message);
   }
 }
 
-(async () => {
-  const reviews = await fetchReviews();
-
-  // Save with a timestamp to help your backend if needed
-  const content = {
-    lastFetched: new Date().toISOString(),
-    reviews,
-  };
-
-  await fs.writeFile('reviews.json', JSON.stringify(content, null, 2), 'utf-8');
-  console.log('reviews.json updated successfully');
-})();
+updateReviews();
