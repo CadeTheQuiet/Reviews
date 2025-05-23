@@ -1,54 +1,48 @@
 import express from 'express';
 import fetch from 'node-fetch';
-import fs from 'fs/promises';
-import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const REVIEWS_FILE = path.resolve('./reviews.json');
-
-async function fetchReviewsFromSerpapi() {
-  const apiKey = process.env.SERPAPI_KEY;
-  if (!apiKey) throw new Error('Missing SERPAPI_KEY env variable');
-
-  // Replace data_id below with your actual data_id or place id from SerpAPI
-  const params = new URLSearchParams({
-    engine: 'google_maps_reviews',
-    data_id: 'ChIJuyDfaumFf4gRpdTNhZ9Z0_Q',
-    hl: 'en',
-    api_key: apiKey,
-  });
-
-  const url = `https://serpapi.com/search?${params.toString()}`;
-
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`SerpAPI fetch failed: ${res.statusText}`);
-
-  const data = await res.json();
-  if (!data.reviews) throw new Error('No reviews found in SerpAPI response');
-
-  await fs.writeFile(REVIEWS_FILE, JSON.stringify(data.reviews, null, 2));
-  return data.reviews;
-}
+const SERPAPI_KEY = process.env.SERPAPI_KEY;
 
 app.get('/reviews', async (req, res) => {
-  try {
-    const update = req.query.update === 'true';
+  if (!SERPAPI_KEY) {
+    return res.status(500).json({ status: 'error', message: 'Missing SERPAPI_KEY env variable' });
+  }
 
-    if (update) {
-      const reviews = await fetchReviewsFromSerpapi();
-      return res.json({ status: 'success', message: `Updated ${reviews.length} reviews`, reviews });
+  // Replace with your actual Place ID
+  const placeId = 'ChIJuyDfaumFf4gRpdTNhZ9Z0_Q';
+
+  const serpApiUrl = `https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${placeId}&api_key=${SERPAPI_KEY}`;
+
+  try {
+    const response = await fetch(serpApiUrl);
+    const data = await response.json();
+
+    if (!data || !data.reviews || data.reviews.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'No reviews found in SerpAPI response' });
     }
 
-    // Serve cached reviews
-    const cached = await fs.readFile(REVIEWS_FILE, 'utf-8');
-    const reviews = JSON.parse(cached);
-    return res.json(reviews);
+    // Map the reviews into your expected format
+    const reviews = data.reviews.map(r => ({
+      review_id: r.review_id,
+      rating: r.rating,
+      date: r.relative_time_description || '',
+      iso_date: r.date || '',
+      author_name: r.user_name || '',
+      author_url: r.user_url || '',
+      profile_photo_url: r.profile_photo || '',
+      text: r.snippet || r.text || '',
+    }));
+
+    res.json(reviews);
+
   } catch (error) {
-    return res.status(500).json({ status: 'error', message: error.message });
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ status: 'error', message: error.message });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
