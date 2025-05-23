@@ -1,5 +1,6 @@
-import fetch from 'node-fetch';
-import fs from 'fs/promises';
+const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
 
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
 const PLACE_ID = process.env.PLACE_ID;
