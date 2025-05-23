@@ -18,11 +18,11 @@ app.get('/reviews', (req, res) => {
 // Endpoint to trigger reviews update
 app.get('/update-reviews', async (req, res) => {
   try {
-    const SERP_API_KEY = process.env.SERP_API_KEY;
+    const SERP_API_KEY = process.env.SERPAPI_KEY;
     const PLACE_ID = 'ChIJuyDfaumFf4gRpdTNhZ9Z0_Q';
 
     const response = await fetch(
-      `https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${PLACE_ID}&api_key=${SERP_API_KEY}`
+      `https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${PLACE_ID}&api_key=${SERPAPI_KEY}`
     );
     const data = await response.json();
 
