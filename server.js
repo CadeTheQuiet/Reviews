@@ -1,40 +1,51 @@
-const express = require('express');
-const fs = require('fs');
-const fetch = require('node-fetch');
-require('dotenv').config();
+import express from 'express';
+import fetch from 'node-fetch';
+import fs from 'fs/promises';
+import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const REVIEWS_FILE = path.resolve('./reviews.json');
 
-app.use(express.static('public'));
+async function fetchReviewsFromSerpapi() {
+  const apiKey = process.env.SERPAPI_KEY;
+  if (!apiKey) throw new Error('Missing SERPAPI_KEY env variable');
 
-// Serve the reviews JSON file
-app.get('/reviews', (req, res) => {
-  const data = fs.readFileSync('reviews.json', 'utf8');
-  res.setHeader('Content-Type', 'application/json');
-  res.send(data);
-});
+  // Replace data_id below with your actual data_id or place id from SerpAPI
+  const params = new URLSearchParams({
+    engine: 'google_maps_reviews',
+    data_id: 'ChIJuyDfaumFf4gRpdTNhZ9Z0_Q',
+    hl: 'en',
+    api_key: apiKey,
+  });
 
-// Endpoint to trigger reviews update
-app.get('/update-reviews', async (req, res) => {
+  const url = `https://serpapi.com/search?${params.toString()}`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`SerpAPI fetch failed: ${res.statusText}`);
+
+  const data = await res.json();
+  if (!data.reviews) throw new Error('No reviews found in SerpAPI response');
+
+  await fs.writeFile(REVIEWS_FILE, JSON.stringify(data.reviews, null, 2));
+  return data.reviews;
+}
+
+app.get('/reviews', async (req, res) => {
   try {
-    const SERPAPI_KEY = process.env.SERPAPI_KEY;
-    const PLACE_ID = 'ChIJuyDfaumFf4gRpdTNhZ9Z0_Q';
+    const update = req.query.update === 'true';
 
-    const response = await fetch(
-      `https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${PLACE_ID}&api_key=${SERPAPI_KEY}`
-    );
-    const data = await response.json();
-
-    if (data && data.reviews) {
-      fs.writeFileSync('reviews.json', JSON.stringify(data.reviews, null, 2));
-      res.send('✅ Reviews updated.');
-    } else {
-      res.status(500).send('❌ No reviews found.');
+    if (update) {
+      const reviews = await fetchReviewsFromSerpapi();
+      return res.json({ status: 'success', message: `Updated ${reviews.length} reviews`, reviews });
     }
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('❌ Error updating reviews.');
+
+    // Serve cached reviews
+    const cached = await fs.readFile(REVIEWS_FILE, 'utf-8');
+    const reviews = JSON.parse(cached);
+    return res.json(reviews);
+  } catch (error) {
+    return res.status(500).json({ status: 'error', message: error.message });
   }
 });
 
