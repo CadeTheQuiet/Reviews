@@ -1,8 +1,8 @@
-name: Update Google Reviews Cache
+name: Fetch Google Reviews (Paginated)
 
 on:
   schedule:
-    - cron: '0 17 * * *' # Runs daily at 11 AM CST (5 PM UTC)
+    - cron: '0 17 * * *' # 11 AM CST
   workflow_dispatch:
 
 jobs:
@@ -13,19 +13,24 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Fetch reviews from SerpApi
-      run: |
-        curl "https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${{ secrets.PLACE_ID }}&api_key=${{ secrets.SERPAPI_KEY }}" \
-          -o reviews-raw.json
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
 
-        # Extract only reviews array using jq
-        jq '.reviews' reviews-raw.json > reviews.json
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run fetch script
+      env:
+        SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+        PLACE_ID: ${{ secrets.PLACE_ID }}
+      run: node fetch-reviews.js
 
     - name: Commit and push reviews
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-
         git add reviews.json
-        git commit -m "Update reviews.json from SerpApi" || echo "No changes to commit"
+        git commit -m "Update reviews.json from SerpApi with pagination" || echo "No changes to commit"
         git push
