@@ -1,8 +1,8 @@
-name: Fetch Google Reviews with Outscraper
+name: Fetch Google Reviews
 
 on:
   schedule:
-    - cron: '0 16 * * 0'  # Every Sunday at 11 AM CST
+    - cron: '0 17 * * 0'  # 11 AM CST every Sunday (17:00 UTC)
   workflow_dispatch:
 
 jobs:
@@ -10,47 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Fetch and Poll for Reviews
+      - name: Fetch reviews from Outscraper
+        env:
+          API_KEY: ${{ secrets.OUTSCRAPER_API_KEY }}
+          BUSINESS_NAME: "Cemetery Brokerage, Memphis, TN"
         run: |
-          API_KEY="${{ secrets.OUTSCRAPER_API_KEY }}"
-          BUSINESS_NAME="Cemetery Brokerage, Memphis, TN"
+          echo "Sending request to Outscraper with:"
+          echo "Business: $BUSINESS_NAME"
 
-          echo "Starting request to Outscraper..."
-          RESPONSE=$(curl -s -X GET "https://api.app.outscraper.com/maps/reviews" \
+          RESPONSE=$(curl -s -X POST "https://api.app.outscraper.com/maps/reviews" \
             -H "X-API-KEY: $API_KEY" \
             --data-urlencode "query=$BUSINESS_NAME" \
             --data-urlencode "limit=100" \
             --data-urlencode "language=en" \
             --data-urlencode "reviewsSort=newest")
 
-          REQUEST_ID=$(echo "$RESPONSE" | jq -r '.id')
-          RESULT_URL=$(echo "$RESPONSE" | jq -r '.results_location')
+          echo "$RESPONSE" | jq '.' > reviews.json
 
-          echo "Polling Outscraper for results..."
-          for i in {1..10}; do
-            STATUS_RESPONSE=$(curl -s "$RESULT_URL" -H "X-API-KEY: $API_KEY")
-            STATUS=$(echo "$STATUS_RESPONSE" | jq -r '.[0].status')
-
-            echo "Attempt $i: Status is $STATUS"
-            if [[ "$STATUS" == "Success" ]]; then
-              echo "$STATUS_RESPONSE" | jq -r '.[0].data' > reviews.json
-              break
-            fi
-            sleep 15
-          done
-
-          if [ ! -f reviews.json ]; then
-            echo "Failed to fetch reviews within the time limit."
-            exit 1
-          fi
-
-      - name: Commit and Push reviews.json
+      - name: Commit and push reviews.json
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add reviews.json
-          git commit -m "Update reviews.json at $(date -u)" || echo "No changes to commit"
+          git commit -m "Update reviews.json from Outscraper"
           git push
