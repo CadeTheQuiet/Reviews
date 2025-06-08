@@ -2,7 +2,7 @@ name: Fetch Google Reviews
 
 on:
   schedule:
-    - cron: '0 17 * * 0'  # 11 AM CST every Sunday (17:00 UTC)
+    - cron: '0 17 * * 0'  # Every Sunday at 11 AM CST
   workflow_dispatch:
 
 jobs:
@@ -18,15 +18,10 @@ jobs:
           API_KEY: ${{ secrets.OUTSCRAPER_API_KEY }}
           BUSINESS_NAME: "Cemetery Brokerage, Memphis, TN"
         run: |
-          echo "Sending request to Outscraper with:"
-          echo "Business: $BUSINESS_NAME"
-
-          RESPONSE=$(curl -s -X POST "https://api.app.outscraper.com/maps/reviews" \
+          RESPONSE=$(curl -s -X POST "https://api.outscraper.com/maps/reviews-v3" \
             -H "X-API-KEY: $API_KEY" \
-            --data-urlencode "query=$BUSINESS_NAME" \
-            --data-urlencode "limit=100" \
-            --data-urlencode "language=en" \
-            --data-urlencode "reviewsSort=newest")
+            -H "Content-Type: application/json" \
+            -d "{\"queries\": [\"$BUSINESS_NAME\"], \"limit\": 100, \"language\": \"en\", \"reviewsSort\": \"newest\"}")
 
           echo "$RESPONSE" | jq '.' > reviews.json
 
