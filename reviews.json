@@ -1,8 +1,8 @@
 [
   {
     "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnTURJbklhN19RRRAB!2m1!1s0x0:0xf4d3599f85cdd4a5!3m1!1s2@1:CIHM0ogKEICAgMDInIa7_QE%7CCgwI-aDSvwYQiPLSgwE%7C?hl=en-US",
-    "rating": 5,
-    "date": "a month ago",
+    "rating": 5.0,
+    "date": "2 months ago",
     "iso_date": "2025-04-08T02:56:57Z",
     "iso_date_of_last_edit": "2025-04-08T02:56:57Z",
     "source": "Google",
@@ -32,7 +32,7 @@
   },
   {
     "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnTUNneFozM3d3RRAB!2m1!1s0x0:0xf4d3599f85cdd4a5!3m1!1s2@1:CIHM0ogKEICAgMCgxZ33wwE%7CCgsI9IfWvQYQ0Nq0EA%7C?hl=en-US",
-    "rating": 5,
+    "rating": 5.0,
     "date": "3 months ago",
     "iso_date": "2025-02-19T07:10:44Z",
     "iso_date_of_last_edit": "2025-02-19T07:10:44Z",
@@ -62,7 +62,7 @@
   },
   {
     "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnTUNnODh1RElnEAE!2m1!1s0x0:0xf4d3599f85cdd4a5!3m1!1s2@1:CIHM0ogKEICAgMCg88uDIg%7CCgwIvt7dvQYQkPrO6QE%7C?hl=en-US",
-    "rating": 5,
+    "rating": 5.0,
     "date": "3 months ago",
     "iso_date": "2025-02-20T18:06:54Z",
     "iso_date_of_last_edit": "2025-02-20T18:06:54Z",
@@ -92,7 +92,7 @@
   },
   {
     "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnTUR3eDg2UUt3EAE!2m1!1s0x0:0xf4d3599f85cdd4a5!3m1!1s2@1:CIHM0ogKEICAgMDwx86QKw%7CCgwI4LWbvwYQyIDZsAE%7C?hl=en-US",
-    "rating": 5,
+    "rating": 5.0,
     "date": "2 months ago",
     "iso_date": "2025-03-28T16:53:10Z",
     "iso_date_of_last_edit": "2025-03-28T17:22:40Z",
@@ -123,7 +123,7 @@
   },
   {
     "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnTUNnajlXNWlBRRAB!2m1!1s0x0:0xf4d3599f85cdd4a5!3m1!1s2@1:CIHM0ogKEICAgMCgj9W5iAE%7CCgwI3LLivQYQiMvEjAE%7C?hl=en-US",
-    "rating": 5,
+    "rating": 5.0,
     "date": "3 months ago",
     "iso_date": "2025-02-21T15:18:32Z",
     "iso_date_of_last_edit": "2025-02-21T15:18:52Z",
@@ -154,7 +154,7 @@
   },
   {
     "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnTUNnai1lUFZ3EAE!2m1!1s0x0:0xf4d3599f85cdd4a5!3m1!1s2@1:CIHM0ogKEICAgMCgj-ePVw%7CCgwI5LfivQYQsIGH1wI%7C?hl=en-US",
-    "rating": 5,
+    "rating": 5.0,
     "date": "3 months ago",
     "iso_date": "2025-02-21T15:29:40Z",
     "iso_date_of_last_edit": "2025-02-21T15:29:40Z",
@@ -184,7 +184,7 @@
   },
   {
     "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnTUNJMkpMU2NnEAE!2m1!1s0x0:0xf4d3599f85cdd4a5!3m1!1s2@1:CIHM0ogKEICAgMCI2JLScg%7CCgwI-dSivwYQyKC47AI%7C?hl=en-US",
-    "rating": 5,
+    "rating": 5.0,
     "date": "2 months ago",
     "iso_date": "2025-03-30T02:20:41Z",
     "iso_date_of_last_edit": "2025-03-30T02:20:41Z",
@@ -218,7 +218,7 @@
   },
   {
     "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnTURnb3JLOTJBRRAB!2m1!1s0x0:0xf4d3599f85cdd4a5!3m1!1s2@1:CIHM0ogKEICAgMDgorK92AE%7CCgwI0L_svQYQsMb_1AE%7C?hl=en-US",
-    "rating": 5,
+    "rating": 5.0,
     "date": "3 months ago",
     "iso_date": "2025-02-23T13:17:04Z",
     "iso_date_of_last_edit": "2025-02-23T13:17:04Z",
