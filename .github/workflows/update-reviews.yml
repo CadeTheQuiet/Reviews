@@ -2,41 +2,30 @@ name: Update Google Reviews Cache
 
 on:
   schedule:
-    # Runs every day at 1 AM UTC (adjust as you like)
-    - cron: "0 1 * * *"
-  workflow_dispatch: # Allow manual trigger
+    - cron: '0 17 * * *' # Runs daily at 11 AM CST (5 PM UTC)
+  workflow_dispatch:
 
 jobs:
-  update-reviews:
+  fetch-reviews:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
-
-    - name: Install dependencies
-      run: npm install node-fetch@3
-
-    - name: Fetch and update reviews
-      env:
-        SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
-        PLACE_ID: ${{ secrets.PLACE_ID }}
+    - name: Fetch reviews from SerpApi
       run: |
-        node update-reviews.js
+        curl "https://serpapi.com/search.json?engine=google_maps_reviews&place_id=${{ secrets.PLACE_ID }}&api_key=${{ secrets.SERPAPI_KEY }}" \
+          -o reviews-raw.json
 
-    - name: Commit & push changes
+        # Extract only reviews array using jq
+        jq '.reviews' reviews-raw.json > reviews.json
+
+    - name: Commit and push reviews
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        if [ -n "$(git status --porcelain)" ]; then
-          git add reviews.json
-          git commit -m "Update cached reviews [skip ci]"
-          git push
-        else
-          echo "No changes to commit"
-        fi
+
+        git add reviews.json
+        git commit -m "Update reviews.json from SerpApi" || echo "No changes to commit"
+        git push
