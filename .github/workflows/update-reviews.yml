@@ -1,8 +1,8 @@
-name: Fetch Google Reviews (Paginated)
+name: Fetch Google Reviews with Outscraper
 
 on:
   schedule:
-    - cron: '0 17 * * *' # 11 AM CST
+    - cron: '0 16 * * 0'  # Every Sunday at 11 AM CST
   workflow_dispatch:
 
 jobs:
@@ -10,27 +10,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      - name: Fetch Reviews from Outscraper
+        run: |
+          API_KEY="${{ secrets.OUTSCRAPER_API_KEY }}"
+          BUSINESS_NAME="Cemetery Brokerage, Memphis, TN"
 
-    - name: Install dependencies
-      run: npm install
+          # Call Outscraper API
+          RESPONSE=$(curl -s -X POST "https://api.app.outscraper.com/maps/reviews" \
+            -H "X-API-KEY: $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "query": "'"$BUSINESS_NAME"'",
+              "limit": 100,
+              "language": "en",
+              "reviewsSort": "newest"
+            }')
 
-    - name: Run fetch script
-      env:
-        SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
-        PLACE_ID: ${{ secrets.PLACE_ID }}
-      run: node fetch-reviews.js
+          # Extract and save reviews
+          echo "$RESPONSE" | jq '.' > reviews.json
 
-    - name: Commit and push reviews
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add reviews.json
-        git commit -m "Update reviews.json from SerpApi with pagination" || echo "No changes to commit"
-        git push
+      - name: Commit and Push reviews.json
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add reviews.json
+          git commit -m "Update reviews.json at $(date -u)"
+          git push
