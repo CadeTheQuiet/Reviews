@@ -13,19 +13,39 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Fetch Reviews from Outscraper
+      - name: Fetch and Poll for Reviews
         run: |
           API_KEY="${{ secrets.OUTSCRAPER_API_KEY }}"
           BUSINESS_NAME="Cemetery Brokerage, Memphis, TN"
-          ENCODED_NAME=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$BUSINESS_NAME'''))")
 
-          curl -s -G "https://api.app.outscraper.com/maps/reviews" \
+          echo "Starting request to Outscraper..."
+          RESPONSE=$(curl -s -X GET "https://api.app.outscraper.com/maps/reviews" \
             -H "X-API-KEY: $API_KEY" \
             --data-urlencode "query=$BUSINESS_NAME" \
             --data-urlencode "limit=100" \
             --data-urlencode "language=en" \
-            --data-urlencode "reviewsSort=newest" \
-            -o reviews.json
+            --data-urlencode "reviewsSort=newest")
+
+          REQUEST_ID=$(echo "$RESPONSE" | jq -r '.id')
+          RESULT_URL=$(echo "$RESPONSE" | jq -r '.results_location')
+
+          echo "Polling Outscraper for results..."
+          for i in {1..10}; do
+            STATUS_RESPONSE=$(curl -s "$RESULT_URL" -H "X-API-KEY: $API_KEY")
+            STATUS=$(echo "$STATUS_RESPONSE" | jq -r '.[0].status')
+
+            echo "Attempt $i: Status is $STATUS"
+            if [[ "$STATUS" == "Success" ]]; then
+              echo "$STATUS_RESPONSE" | jq -r '.[0].data' > reviews.json
+              break
+            fi
+            sleep 15
+          done
+
+          if [ ! -f reviews.json ]; then
+            echo "Failed to fetch reviews within the time limit."
+            exit 1
+          fi
 
       - name: Commit and Push reviews.json
         run: |
