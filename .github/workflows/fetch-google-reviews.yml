@@ -16,14 +16,10 @@ jobs:
       - name: Fetch reviews from Outscraper
         env:
           API_KEY: ${{ secrets.OUTSCRAPER_API_KEY }}
-          BUSINESS_NAME: "Cemetery Brokerage, Memphis, TN"
         run: |
-          RESPONSE=$(curl -s -X POST "https://api.app.outscraper.com/api/v1/maps/reviews" \
+          curl -s -X GET "https://api.outscraper.cloud/maps/reviews-v3?query=Cemetery%20Brokerage%2C%20Memphis%2C%20TN&limit=100&async=false&language=en&reviewsSort=newest" \
             -H "X-API-KEY: $API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "{\"query\": \"$BUSINESS_NAME\", \"limit\": 100, \"language\": \"en\", \"sort\": \"newest\"}")
-          
-          echo "$RESPONSE" | jq '.' > reviews.json
+            -o reviews.json
 
       - name: Commit and push reviews.json
         run: |
