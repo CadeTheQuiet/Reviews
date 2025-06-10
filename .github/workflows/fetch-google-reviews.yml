@@ -18,20 +18,17 @@ jobs:
           API_KEY: ${{ secrets.OUTSCRAPER_API_KEY }}
           BUSINESS_NAME: "Cemetery Brokerage, Memphis, TN"
         run: |
-          RESPONSE=$(curl -s -X POST "https://api.outscraper.com/maps/reviews-v3" \
+          RESPONSE=$(curl -s -X POST "https://api.app.outscraper.com/api/v1/maps/reviews" \
             -H "X-API-KEY: $API_KEY" \
             -H "Content-Type: application/json" \
-            -d "{\"queries\": [\"$BUSINESS_NAME\"], \"limit\": 100, \"language\": \"en\", \"reviewsSort\": \"newest\"}")
-
+            -d "{\"query\": \"$BUSINESS_NAME\", \"limit\": 100, \"language\": \"en\", \"sort\": \"newest\"}")
+          
           echo "$RESPONSE" | jq '.' > reviews.json
-
-      - name: Print reviews.json (for debugging, optional)
-        run: cat reviews.json
 
       - name: Commit and push reviews.json
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add reviews.json
-          git commit -m "Update reviews.json from Outscraper" || echo "No changes to commit"
+          git diff --cached --quiet || git commit -m "Update reviews.json from Outscraper"
           git push
